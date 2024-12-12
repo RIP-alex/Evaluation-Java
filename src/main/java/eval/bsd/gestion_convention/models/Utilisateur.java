@@ -1,21 +1,20 @@
 package eval.bsd.gestion_convention.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import lombok.*;
 
 @Entity
 @Table(name = "utilisateurs")
-@Data // Lombok pour générer getters, setters, etc.
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 
-    public class Utilisateur {
 
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Integer id;
+public class Utilisateur {
+    @Id  // Annotation JPA pour la clé primaire
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(unique = true, nullable = false)
     @Email(message = "L'email doit être valide")
@@ -26,7 +25,4 @@ import lombok.NoArgsConstructor;
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
-    @ManyToOne
-    private Entreprise entreprise;
 }
