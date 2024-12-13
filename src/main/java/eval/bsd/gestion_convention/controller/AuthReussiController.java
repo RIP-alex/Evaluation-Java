@@ -11,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "*")
@@ -25,7 +26,6 @@ public class AuthReussiController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginDTO) {
         try {
-            // Tente d'authentifier l'utilisateur
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDTO.getEmail(),
@@ -33,24 +33,21 @@ public class AuthReussiController {
                     )
             );
 
-            // Si l'authentification réussit, on récupère les détails de l'utilisateur
             AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
-
-            // On génère un token JWT
             String token = jwtUtils.generateToken(userDetails);
 
-            // On crée la réponse avec le token et les informations de l'utilisateur
-            return ResponseEntity.ok(new AuthReussiDTO(
+            AuthReussiDTO reponse = new AuthReussiDTO(
                     token,
                     userDetails.getAuthorities().iterator().next().getAuthority(),
                     userDetails.getUsername()
-            ));
+            );
+
+            return ResponseEntity.ok(reponse);
 
         } catch (Exception e) {
-            // En cas d'échec de l'authentification
             return ResponseEntity
                     .badRequest()
-                    .body("Email ou mot de passe incorrect");
+                    .body("Erreur d'authentification: " + e.getMessage());
         }
     }
 }

@@ -11,12 +11,20 @@ import org.springframework.stereotype.Service;
 public class AppUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UtilisateurDao utilisateurDao;
+    private UtilisateurDao utilisateurDAO;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return utilisateurDao.findByEmail(email)
-                .map(AppUserDetails::new)
-                .orElseThrow(() -> new UsernameNotFoundException("Email introuvable : " + email));
+        System.out.println("Tentative de chargement de l'utilisateur avec email: " + email);
+
+        return utilisateurDAO.findByEmail(email)
+                .map(utilisateur -> {
+                    System.out.println("Utilisateur trouvé avec rôle: " + utilisateur.getRole());
+                    return new AppUserDetails(utilisateur);
+                })
+                .orElseThrow(() -> {
+                    System.out.println("Utilisateur non trouvé avec email: " + email);
+                    return new UsernameNotFoundException("Utilisateur non trouvé: " + email);
+                });
     }
 }

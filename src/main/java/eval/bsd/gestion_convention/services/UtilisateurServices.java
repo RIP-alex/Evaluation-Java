@@ -1,6 +1,8 @@
 package eval.bsd.gestion_convention.services;
 
+import eval.bsd.gestion_convention.dao.EntrepriseDao;
 import eval.bsd.gestion_convention.dao.UtilisateurDao;
+import eval.bsd.gestion_convention.models.Entreprise;
 import eval.bsd.gestion_convention.models.Utilisateur;
 import eval.bsd.gestion_convention.models.Role;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,15 +19,11 @@ import java.util.Optional;
 public class UtilisateurServices {
 
     @Autowired
-    private UtilisateurDao utilisateurDao   ;
+    private UtilisateurDao utilisateurDao;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Crée un nouvel utilisateur avec validation des données et encodage du mot de passe.
-     * Cette méthode vérifie également si l'email n'est pas déjà utilisé.
-     */
     public Utilisateur creerUtilisateur(Utilisateur utilisateur) {
         // Vérification de l'unicité de l'email
         if (utilisateurDao.findByEmail(utilisateur.getEmail()).isPresent()) {
@@ -35,59 +33,53 @@ public class UtilisateurServices {
         // Encodage du mot de passe
         utilisateur.setPassword(passwordEncoder.encode(utilisateur.getPassword()));
 
-        // Si aucun rôle n'est spécifié, on attribue le rôle ENTREPRISE par défaut
-        if (utilisateur.getRole() == null) {
+        // Détermination du rôle
+        if (utilisateur.getEntreprise() == null) {
+            utilisateur.setRole(Role.ADMINISTRATEUR);
+        } else {
             utilisateur.setRole(Role.ENTREPRISE);
         }
 
         return utilisateurDao.save(utilisateur);
     }
 
-    /**
-     * Récupère un utilisateur par son ID.
-     * Lance une exception si l'utilisateur n'est pas trouvé.
-     */
     public Utilisateur getById(Integer id) {
         return utilisateurDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé avec l'ID : " + id));
     }
 
-    /**
-     * Récupère un utilisateur par son email.
-     */
     public Optional<Utilisateur> getByEmail(String email) {
         return utilisateurDao.findByEmail(email);
     }
 
-    /**
-     * Met à jour les informations d'un utilisateur existant.
-     * Seules certaines informations peuvent être modifiées.
-     */
     public Utilisateur mettreAJour(Integer id, Utilisateur utilisateurModifie) {
         Utilisateur utilisateurExistant = getById(id);
 
-        // Vérification de l'unicité de l'email si modifié
+        // Vérification de l'unicité de l'email
         if (!utilisateurExistant.getEmail().equals(utilisateurModifie.getEmail()) &&
                 utilisateurDao.findByEmail(utilisateurModifie.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Cet email est déjà utilisé");
         }
 
-        // Mise à jour des champs modifiables
+        // Mise à jour des champs
         utilisateurExistant.setEmail(utilisateurModifie.getEmail());
+
         if (utilisateurModifie.getPassword() != null) {
             utilisateurExistant.setPassword(passwordEncoder.encode(utilisateurModifie.getPassword()));
         }
 
-        // Le rôle ne peut être modifié que par un administrateur
-        // Cette logique sera gérée au niveau du contrôleur avec les annotations de sécurité
+        // Mise à jour du rôle et de l'entreprise
+        if (utilisateurModifie.getEntreprise() == null) {
+            utilisateurExistant.setRole(Role.ADMINISTRATEUR);
+            utilisateurExistant.setEntreprise(null);
+        } else {
+            utilisateurExistant.setRole(Role.ENTREPRISE);
+            utilisateurExistant.setEntreprise(utilisateurModifie.getEntreprise());
+        }
 
         return utilisateurDao.save(utilisateurExistant);
     }
 
-    /**
-     * Supprime un utilisateur par son ID.
-     * Vérifie d'abord si l'utilisateur existe.
-     */
     public void supprimer(Integer id) {
         if (!utilisateurDao.existsById(id)) {
             throw new EntityNotFoundException("Utilisateur non trouvé avec l'ID : " + id);
@@ -95,9 +87,6 @@ public class UtilisateurServices {
         utilisateurDao.deleteById(id);
     }
 
-    /**
-     * Récupère la liste de tous les utilisateurs.
-     */
     public List<Utilisateur> getTout() {
         return utilisateurDao.findAll();
     }

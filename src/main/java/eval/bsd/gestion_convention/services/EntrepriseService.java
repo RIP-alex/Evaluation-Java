@@ -1,8 +1,10 @@
 package eval.bsd.gestion_convention.services;
 
 import eval.bsd.gestion_convention.dao.EntrepriseDao;
+import eval.bsd.gestion_convention.dao.UtilisateurDao;
 import eval.bsd.gestion_convention.models.Entreprise;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +17,12 @@ public class EntrepriseService {
     @Autowired
     private EntrepriseDao entrepriseDao;
 
+    @Autowired
+    private UtilisateurDao utilisateurDao;
+
+    @Autowired
+    BCryptPasswordEncoder bCryptPasswordEncoder;
+
     /**
      * Crée une nouvelle entreprise après avoir vérifié que son nom n'existe pas déjà.
      * Cette vérification est importante pour maintenir l'unicité des entreprises.
@@ -24,6 +32,10 @@ public class EntrepriseService {
         if (entrepriseDao.findByNom(entreprise.getNom()).isPresent()) {
             throw new IllegalArgumentException("Une entreprise avec ce nom existe déjà");
         }
+
+        entreprise.getUtilisateurs().get(0).setPassword(bCryptPasswordEncoder.encode(entreprise.getUtilisateurs().get(0).getPassword()));
+        utilisateurDao.save( entreprise.getUtilisateurs().get(0));
+
         return entrepriseDao.save(entreprise);
     }
 

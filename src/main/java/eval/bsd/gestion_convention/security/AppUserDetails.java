@@ -13,8 +13,8 @@ public class AppUserDetails implements UserDetails {
 
     private final Utilisateur utilisateur;
 
-    public AppUserDetails(Utilisateur utilisateur) {
-        this.utilisateur = utilisateur;
+    public AppUserDetails(Object utilisateur) {
+        this.utilisateur = (Utilisateur) utilisateur;
     }
 
     @Override

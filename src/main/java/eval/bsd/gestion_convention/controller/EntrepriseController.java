@@ -13,17 +13,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/entreprises")
-@CrossOrigin(origins = "*")  // Permet les requêtes de n'importe quelle origine
+
+@CrossOrigin  // Permet les requêtes de n'importe quelle origine
 public class EntrepriseController {
 
     @Autowired
     private EntrepriseService entrepriseService;
 
     // Création d'une nouvelle entreprise - réservé aux administrateurs
-    @IsAdmin
-    @PostMapping
-    public ResponseEntity<Entreprise> creer(@Valid @RequestBody Entreprise entreprise) {
+//    @IsAdmin
+    @PostMapping("/toto")
+    public ResponseEntity<Entreprise> creer(@RequestBody Entreprise entreprise) {
         try {
             Entreprise nouvelleEntreprise = entrepriseService.creer(entreprise);
             return ResponseEntity.ok(nouvelleEntreprise);
