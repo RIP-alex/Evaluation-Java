@@ -4,7 +4,6 @@ import eval.bsd.gestion_convention.dto.LoginDTO;
 import eval.bsd.gestion_convention.dto.AuthReussiDTO;
 import eval.bsd.gestion_convention.security.AppUserDetails;
 import eval.bsd.gestion_convention.security.JwtUtils;
-import eval.bsd.gestion_convention.services.UtilisateurServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

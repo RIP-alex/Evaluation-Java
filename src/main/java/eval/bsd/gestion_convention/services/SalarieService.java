@@ -10,23 +10,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
 public class SalarieService {
 
     @Autowired
-    private SalarieDao salarieDao;
+    private static SalarieDao salarieDao;
 
     @Autowired
     private ConventionDao conventionDao;
 
     /**
      * Crée un nouveau salarié en vérifiant toutes les contraintes métier.
-     * Cette méthode s'assure que :
+     * Cette méthode que j'utilise assure que :
      * - Le matricule est unique et respecte le format requis
      * - La convention n'a pas atteint son nombre maximum de salariés
-     * - Le code barre n'est pas vide
+     * - Le code barre n'est pas vide.
      */
     public Salarie creer(Salarie salarie, Integer conventionId) {
         // Vérifie que la convention existe
@@ -56,6 +57,11 @@ public class SalarieService {
         salarie.setConvention(convention);
 
         return salarieDao.save(salarie);
+    }
+
+    public static Salarie findByMatricule(String matricule) {
+        return salarieDao.findByMatricule(matricule)
+                .orElseThrow(() -> new EntityNotFoundException("Salarié non trouvé avec le matricule : " + matricule));
     }
 
     /**
@@ -89,6 +95,17 @@ public class SalarieService {
         }
 
         return salarieDao.save(salarieExistant);
+    }
+
+    // Méthode pour vérifier le code barre
+    public Optional<Salarie> findByCodeBarre(String codeBarre) {
+        // On vérifie d'abord que le code barre n'est pas null ou vide
+        if (codeBarre == null || codeBarre.trim().isEmpty()) {
+            throw new IllegalArgumentException("Le code barre ne peut pas être vide");
+        }
+
+        // On appelle la méthode du DAO pour chercher le salarié
+        return salarieDao.findByCodeBarre(codeBarre);
     }
 
     /**
