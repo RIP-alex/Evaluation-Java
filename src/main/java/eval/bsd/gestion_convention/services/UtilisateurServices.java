@@ -54,7 +54,6 @@ public class UtilisateurServices {
 
     /**
      * Récupère un utilisateur par son email.
-     * Cette méthode est particulièrement utile pour l'authentification.
      */
     public Optional<Utilisateur> getByEmail(String email) {
         return utilisateurDao.findByEmail(email);
